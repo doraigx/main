@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="ja" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>doraigx.github.io | App Launcher & Hub</title>
+  <!-- Google Fonts: Inter & Noto Sans JP -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'Noto Sans JP', 'sans-serif'],
+          },
+          colors: {
+            darkBg: '#090d16',
+            darkCard: 'rgba(17, 25, 40, 0.72)',
+            lightBg: '#f1f5f9',
+            lightCard: 'rgba(255, 255, 255, 0.82)',
+          },
+          animation: {
+            'blob': 'blob 12s infinite alternate',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(30px, -40px) scale(1.08)' },
+              '66%': { transform: 'translate(-20px, 25px) scale(0.95)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* カスタムグラスモーフィズム＆マイクロインタラクション用スタイル */
+    body {
+      font-family: 'Inter', 'Noto Sans JP', sans-serif;
+      transition: background-color 0.35s ease, color 0.35s ease;
+    }
+
+    .glass-panel {
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                  box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                  border-color 0.3s ease,
+                  background-color 0.35s ease;
+    }
+
+    .bento-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* カードのホバー時光沢スイープ効果 */
+    .bento-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.08),
+        transparent
+      );
+      transform: skewX(-25deg);
+      transition: left 0.65s ease;
+      pointer-events: none;
+    }
+
+    .bento-card:hover::before {
+      left: 160%;
+    }
+
+    .bento-card:hover {
+      transform: translateY(-4px);
+    }
+
+    /* カスタムスクロールバー */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.35);
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(148, 163, 184, 0.55);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-lightBg dark:bg-darkBg text-slate-800 dark:text-slate-100 antialiased selection:bg-indigo-500 selection:text-white relative overflow-x-hidden flex flex-col justify-between">
+
+  <!-- 背景のアンビエントメッシュグラデーション -->
+  <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
+    <div class="absolute -top-32 -left-24 w-96 h-96 bg-indigo-500/20 dark:bg-indigo-600/20 rounded-full blur-3xl animate-blob"></div>
+    <div class="absolute top-1/3 -right-24 w-[28rem] h-[28rem] bg-cyan-500/20 dark:bg-cyan-500/15 rounded-full blur-3xl animate-blob" style="animation-delay: 2s;"></div>
+    <div class="absolute -bottom-32 left-1/4 w-[26rem] h-[26rem] bg-fuchsia-500/15 dark:bg-purple-600/15 rounded-full blur-3xl animate-blob" style="animation-delay: 4s;"></div>
+  </div>
+
+  <!-- メインコンテナ -->
+  <div class="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 flex-grow flex flex-col justify-center">
+
+    <!-- トップナビゲーション / ヘッダー -->
+    <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 sm:mb-8">
+      <!-- ブランドロゴ＆挨拶 -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 via-purple-500 to-cyan-500 p-0.5 shadow-lg shadow-indigo-500/25 shrink-0">
+          <div class="w-full h-full bg-white dark:bg-slate-900 rounded-[14px] flex items-center justify-center">
+            <svg class="w-6 h-6 text-indigo-500 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+              <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+              <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+            </svg>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 via-indigo-800 to-slate-700 dark:from-white dark:via-indigo-200 dark:to-slate-300">
+              doraigx.github.io
+            </h1>
+            <span class="px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider rounded-full bg-indigo-500/10 text-indigo-600 dark:bg-indigo-400/15 dark:text-indigo-300 border border-indigo-500/20">
+              Hub
+            </span>
+          </div>
+          <p id="live-clock" class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+            読み込み中...
+          </p>
+        </div>
+      </div>
+
+      <!-- コントロールバー（新規タブ切替 ＆ テーマ切替） -->
+      <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
+        <!-- 新しいタブで開くトグル -->
+        <button
+          id="target-toggle-btn"
+          type="button"
+          onclick="toggleOpenTarget()"
+          class="glass-panel flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl bg-lightCard dark:bg-darkCard border border-slate-200/80 dark:border-slate-700/70 shadow-sm hover:border-indigo-400/60 text-xs sm:text-sm font-medium cursor-pointer select-none"
+          title="リンクを開く方法の切り替え"
+        >
+          <span id="target-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] transition-colors"></span>
+          <span id="target-label" class="text-slate-700 dark:text-slate-200">新しいタブで開く</span>
+          <svg class="w-4 h-4 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+            <polyline points="15 3 21 3 21 9"></polyline>
+            <line x1="10" y1="14" x2="21" y2="3"></line>
+          </svg>
+        </button>
+
+        <!-- ダーク/ライトモード切り替えボタン -->
+        <button
+          id="theme-toggle-btn"
+          type="button"
+          onclick="toggleTheme()"
+          aria-label="テーマ切り替え"
+          class="glass-panel p-2.5 rounded-2xl bg-lightCard dark:bg-darkCard border border-slate-200/80 dark:border-slate-700/70 shadow-sm hover:border-indigo-400/60 text-slate-700 dark:text-slate-200 cursor-pointer"
+          title="ダーク / ライトモード切り替え"
+        >
+          <!-- 太陽アイコン (ダークモード時に表示) -->
+          <svg id="sun-icon" class="w-5 h-5 hidden dark:block text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <!-- 月アイコン (ライトモード時に表示) -->
+          <svg id="moon-icon" class="w-5 h-5 block dark:hidden text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- 検索バー ＆ クイックフィルタ（スタートページ機能） -->
+    <section class="mb-6 sm:mb-8">
+      <div class="glass-panel rounded-2xl bg-lightCard dark:bg-darkCard border border-slate-200/80 dark:border-slate-700/70 p-2 sm:p-2.5 shadow-sm flex items-center gap-2 focus-within:ring-2 focus-within:ring-indigo-500/50 focus-within:border-indigo-500/60">
+        <div class="pl-2.5 text-slate-400">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="アプリを絞り込み、または Enter で Google 検索... ( / キーでフォーカス )"
+          class="w-full bg-transparent border-none outline-none text-sm sm:text-base text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 py-1.5"
+          autocomplete="off"
+        />
+        <button
+          id="clear-search-btn"
+          type="button"
+          onclick="clearSearch()"
+          class="hidden px-2.5 py-1 text-xs font-medium rounded-xl bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 cursor-pointer"
+        >
+          クリア
+        </button>
+        <button
+          id="web-search-btn"
+          type="button"
+          onclick="executeWebSearch()"
+          class="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold shadow-sm transition-colors shrink-0 cursor-pointer"
+        >
+          <span>Google検索</span>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Bento Grid メインカードエリア -->
+    <main id="apps-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4 sm:gap-6">
+      <!-- カードはJavaScriptで動的レンダリングして検索フィルタや状態管理と完全同期 -->
+    </main>
+
+    <!-- 検索ヒットなし時のWeb検索フォールバック表示 -->
+    <div id="no-match-box" class="hidden glass-panel rounded-3xl bg-lightCard dark:bg-darkCard border border-slate-200/80 dark:border-slate-700/70 p-8 text-center my-4">
+      <p class="text-slate-600 dark:text-slate-300 font-medium mb-4">
+        一致する収録アプリが見つかりませんでした。そのままWeb検索しますか？
+      </p>
+      <button
+        type="button"
+        onclick="executeWebSearch()"
+        class="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+      >
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <span id="fallback-search-text">Google で検索する</span>
+      </button>
+    </div>
+
+    <!-- キーボードショートカットガイド（デスクトップ向けフッターバー） -->
+    <section class="mt-6 sm:mt-8 glass-panel rounded-2xl bg-lightCard/60 dark:bg-darkCard/50 border border-slate-200/70 dark:border-slate-800/80 px-4 py-3 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500 dark:text-slate-400">
+      <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+        <span class="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+          <svg class="w-4 h-4 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M7 16h10"></path>
+          </svg>
+          ショートカット:
+        </span>
+        <span class="inline-flex items-center gap-1"><kbd class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono text-[11px] text-slate-700 dark:text-slate-200">1</kbd> ポータル</span>
+        <span class="inline-flex items-center gap-1"><kbd class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono text-[11px] text-slate-700 dark:text-slate-200">2</kbd> Cube Maze</span>
+        <span class="inline-flex items-center gap-1"><kbd class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono text-[11px] text-slate-700 dark:text-slate-200">3</kbd> イラストゲーム</span>
+        <span class="hidden sm:inline-flex items-center gap-1"><kbd class="px-1.5 py-0.5 rounded bg-slate-200/80 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 font-mono text-[11px] text-slate-700 dark:text-slate-200">/</kbd> 検索</span>
+      </div>
+      <div class="text-[11px] text-slate-400 dark:text-slate-500">
+        &copy; doraigx.github.io
+      </div>
+    </section>
+
+  </div>
+
+  <!-- クイックプレビューモーダル（iframe表示） -->
+  <div
+    id="preview-modal"
+    class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-6 bg-slate-950/75 backdrop-blur-md transition-opacity"
+    onclick="closePreviewModal(event)"
+  >
+    <div
+      class="w-full max-w-5xl h-[85vh] bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-700/80 shadow-2xl flex flex-col overflow-hidden"
+      onclick="event.stopPropagation()"
+    >
+      <!-- モーダルヘッダー -->
+      <div class="px-4 sm:px-6 py-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 bg-slate-50/80 dark:bg-slate-900/90">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="flex items-center gap-1.5 shrink-0">
+            <span class="w-3 h-3 rounded-full bg-rose-500"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
+          </div>
+          <div class="min-w-0">
+            <h3 id="preview-title" class="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 truncate">
+              クイックプレビュー
+            </h3>
+            <p id="preview-url-text" class="text-xs text-slate-500 dark:text-slate-400 truncate font-mono">
+              https://doraigx.github.io/
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            id="preview-open-full-btn"
+            type="button"
+            class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span>フル画面で開く</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </button>
+          <button
+            type="button"
+            onclick="closePreviewModal()"
+            aria-label="プレビューを閉じる"
+            class="p-2 rounded-xl bg-slate-200/80 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- iframe コンテナ -->
+      <div class="relative flex-grow bg-slate-100 dark:bg-slate-950">
+        <div id="preview-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-3 text-slate-500 dark:text-slate-400 pointer-events-none">
+          <div class="w-8 h-8 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin"></div>
+          <span class="text-xs font-medium">プレビューを読み込んでいます...</span>
+        </div>
+        <iframe
+          id="preview-iframe"
+          src="about:blank"
+          title="サイトプレビュー"
+          class="w-full h-full border-0 relative z-10"
+          onload="document.getElementById('preview-loader').classList.add('hidden')"
+        ></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- トースト通知用コンテナ -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    /**
+     * 収録アプリケーションデータ定義
+     * Bento Grid のレイアウト比率（lg:col-span-*）やカラーテーマ、SVGアイコンを設定
+     */
+    const APPS = [
+      {
+        id: 'portal',
+        shortcutKey: '1',
+        title: 'ポータル',
+        subtitle: 'Personal PWA Dashboard',
+        url: 'https://doraigx.github.io/Potal_1/',
+        description: '天気予報・リアルタイム地震情報・為替レート・最新ニュースなどをひとつに集約した個人用PWAポータルサイト。',
+        tags: ['PWA', '天気・防災', '為替・ニュース'],
+        keywords: 'ポータル portal pwa 天気 地震 為替 ニュース ダッシュボード',
+        colSpanClass: 'md:col-span-2 lg:col-span-12', // PCでは最上段ワイドBentoカード
+        featured: true,
+        accentGradient: 'from-sky-500 via-blue-600 to-indigo-600',
+        badgeBg: 'bg-sky-500/15 text-sky-600 dark:text-sky-300 border-sky-500/25',
+        buttonBg: 'bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-400 hover:to-indigo-500 shadow-sky-500/25',
+        iconSvg: `
+          <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path>
+            <path d="M22 10a3 3 0 0 0-3-3h-2.207a5.502 5.502 0 0 0-10.702.5"></path>
+          </svg>
+        `
+      },
+      {
+        id: 'cubemaze',
+        shortcutKey: '2',
+        title: 'Cube Maze',
+        subtitle: '3D Spatial Puzzle Game',
+        url: 'https://doraigx.github.io/cubemaze/main.html',
+        description: '立体的な迷路空間を回転・探索してゴールを目指す3Dパズルゲーム。直感的な操作と空間認識力が鍵。',
+        tags: ['3Dパズル', 'ブラウザゲーム', 'WebGL'],
+        keywords: 'cube maze キューブ メイズ 3d パズル ゲーム 迷路',
+        colSpanClass: 'md:col-span-1 lg:col-span-6', // PCでは下段左ハーフBentoカード
+        featured: false,
+        accentGradient: 'from-violet-500 via-purple-600 to-fuchsia-600',
+        badgeBg: 'bg-purple-500/15 text-purple-600 dark:text-purple-300 border-purple-500/25',
+        buttonBg: 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 shadow-purple-500/25',
+        iconSvg: `
+          <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+            <line x1="12" y1="22.08" x2="12" y2="12"></line>
+          </svg>
+        `
+      },
+      {
+        id: 'illustgame',
+        shortcutKey: '3',
+        title: 'イラストゲーム',
+        subtitle: 'Interactive Illustration Game',
+        url: 'https://doraigx.github.io/game/main.html',
+        description: 'お絵描きやイラストをテーマに気軽に遊べるブラウザゲーム。スマホでもPCでもサクッと楽しめます。',
+        tags: ['イラスト', 'カジュアルゲーム', 'HTML5'],
+        keywords: 'イラストゲーム お絵描き game ブラウザゲーム カジュアル',
+        colSpanClass: 'md:col-span-1 lg:col-span-6', // PCでは下段右ハーフBentoカード
+        featured: false,
+        accentGradient: 'from-emerald-500 via-teal-500 to-cyan-600',
+        badgeBg: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-300 border-emerald-500/25',
+        buttonBg: 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 shadow-emerald-500/25',
+        iconSvg: `
+          <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+            <path d="M2 2l7.586 7.586"></path>
+            <circle cx="11" cy="11" r="2"></circle>
+          </svg>
+        `
+      }
+    ];
+
+    // アプリケーション状態（localStorageに保存）
+    let openInNewTab = true;
+    let searchQuery = '';
+
+    /**
+     * 初期化処理
+     */
+    function init() {
+      // 保存されたテーマ設定の復元
+      const savedTheme = localStorage.getItem('doraigx_theme');
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+
+      // 保存されたリンク挙動（新しいタブ vs 現在のタブ）の復元
+      const savedTarget = localStorage.getItem('doraigx_open_new_tab');
+      if (savedTarget !== null) {
+        openInNewTab = savedTarget === 'true';
+      }
+      updateTargetToggleUI();
+
+      // 時計の開始
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      // カードの初回描画
+      renderCards();
+
+      // イベントリスナー登録
+      setupEventListeners();
+    }
+
+    /**
+     * ライブ時計・日付の更新
+     */
+    function updateClock() {
+      const now = new Date();
+      const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const weekday = weekdays[now.getDay()];
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+
+      const clockEl = document.getElementById('live-clock');
+      if (clockEl) {
+        clockEl.textContent = `${year}年${month}月${day}日 (${weekday})  ${hours}:${minutes}`;
+      }
+    }
+
+    /**
+     * ダーク / ライトモード切り替え
+     */
+    function toggleTheme() {
+      const htmlEl = document.documentElement;
+      const isDark = htmlEl.classList.toggle('dark');
+      localStorage.setItem('doraigx_theme', isDark ? 'dark' : 'light');
+      showToast(isDark ? 'ダークモードに切り替えました' : 'ライトモードに切り替えました');
+    }
+
+    /**
+     * リンクを開くターゲット（新しいタブ / 現在のタブ）切り替え
+     */
+    function toggleOpenTarget() {
+      openInNewTab = !openInNewTab;
+      localStorage.setItem('doraigx_open_new_tab', String(openInNewTab));
+      updateTargetToggleUI();
+      showToast(openInNewTab ? 'リンクを新しいタブで開きます' : 'リンクを現在のタブで開きます');
+    }
+
+    /**
+     * ターゲット切り替えボタンの表示更新
+     */
+    function updateTargetToggleUI() {
+      const label = document.getElementById('target-label');
+      const indicator = document.getElementById('target-indicator');
+      if (openInNewTab) {
+        label.textContent = '新しいタブで開く';
+        indicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.7)] transition-colors';
+      } else {
+        label.textContent = '現在のタブで開く';
+        indicator.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.7)] transition-colors';
+      }
+    }
+
+    /**
+     * アプリケーションを実際に開く
+     */
+    function launchApp(url, title) {
+      if (openInNewTab) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      } else {
+        window.location.href = url;
+      }
+    }
+
+    /**
+     * URLクリップボードコピー（iFrame制約も考慮したフォールバック付き）
+     */
+    function copyAppUrl(event, url, title) {
+      event.stopPropagation();
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-9999px';
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast(`「${title}」のURLをコピーしました`);
+      } catch (err) {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(url).then(() => {
+            showToast(`「${title}」のURLをコピーしました`);
+          });
+        }
+      }
+      document.body.removeChild(textArea);
+    }
+
+    /**
+     * クイックプレビューモーダルを開く
+     */
+    function openPreviewModal(event, appId) {
+      event.stopPropagation();
+      const app = APPS.find(item => item.id === appId);
+      if (!app) return;
+
+      const modal = document.getElementById('preview-modal');
+      const titleEl = document.getElementById('preview-title');
+      const urlEl = document.getElementById('preview-url-text');
+      const iframe = document.getElementById('preview-iframe');
+      const loader = document.getElementById('preview-loader');
+      const fullBtn = document.getElementById('preview-open-full-btn');
+
+      titleEl.textContent = `${app.title} — クイックプレビュー`;
+      urlEl.textContent = app.url;
+      loader.classList.remove('hidden');
+      iframe.src = app.url;
+
+      fullBtn.onclick = () => {
+        closePreviewModal();
+        launchApp(app.url, app.title);
+      };
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+      document.body.style.overflow = 'hidden';
+    }
+
+    /**
+     * クイックプレビューモーダルを閉じる
+     */
+    function closePreviewModal(event) {
+      if (event && event.target !== document.getElementById('preview-modal')) {
+        return;
+      }
+      const modal = document.getElementById('preview-modal');
+      const iframe = document.getElementById('preview-iframe');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      iframe.src = 'about:blank';
+      document.body.style.overflow = '';
+    }
+
+    /**
+     * Bento Grid カードのレンダリング
+     */
+    function renderCards() {
+      const grid = document.getElementById('apps-grid');
+      const noMatchBox = document.getElementById('no-match-box');
+      const query = searchQuery.trim().toLowerCase();
+
+      const filteredApps = APPS.filter(app => {
+        if (!query) return true;
+        return (
+          app.title.toLowerCase().includes(query) ||
+          app.subtitle.toLowerCase().includes(query) ||
+          app.description.toLowerCase().includes(query) ||
+          app.keywords.toLowerCase().includes(query) ||
+          app.tags.some(t => t.toLowerCase().includes(query))
+        );
+      });
+
+      if (filteredApps.length === 0) {
+        grid.innerHTML = '';
+        noMatchBox.classList.remove('hidden');
+        document.getElementById('fallback-search-text').textContent = `「${searchQuery}」を Google で検索する`;
+        return;
+      }
+
+      noMatchBox.classList.add('hidden');
+
+      grid.innerHTML = filteredApps.map(app => {
+        const tagsHtml = app.tags.map(tag => `
+          <span class="px-2.5 py-1 text-[11px] font-semibold rounded-lg border ${app.badgeBg}">
+            ${tag}
+          </span>
+        `).join('');
+
+        // 最上段のポータルカードはPCで横長のレイアウト構成にしてBento Grid感を強調
+        const layoutInnerClass = app.featured
+          ? 'flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'
+          : 'flex flex-col justify-between h-full gap-6';
+
+        const actionAreaClass = app.featured
+          ? 'flex flex-wrap sm:flex-nowrap items-center gap-2.5 lg:shrink-0'
+          : 'flex flex-wrap sm:flex-nowrap items-center gap-2.5 pt-2 border-t border-slate-200/70 dark:border-slate-700/60';
+
+        return `
+          <article
+            onclick="launchApp('${app.url}', '${app.title}')"
+            class="bento-card glass-panel ${app.colSpanClass} rounded-3xl bg-lightCard dark:bg-darkCard border border-slate-200/80 dark:border-slate-700/70 p-6 sm:p-7 shadow-lg shadow-slate-900/5 dark:shadow-black/30 hover:border-indigo-400/70 dark:hover:border-indigo-400/60 cursor-pointer group"
+          >
+            <div class="${layoutInnerClass}">
+              <!-- 左側 / 上側: アイコン・タイトル・説明 -->
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-4 mb-4">
+                  <div class="flex items-center gap-4">
+                    <!-- グラデーションアイコンボックス -->
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${app.accentGradient} flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 shrink-0">
+                      ${app.iconSvg}
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <h2 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-indigo-600 dark:group-hover:text-indigo-300 transition-colors">
+                          ${app.title}
+                        </h2>
+                        <span class="hidden sm:inline-flex items-center justify-center px-2 py-0.5 text-[11px] font-mono font-bold rounded-md bg-slate-200/80 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300/80 dark:border-slate-700">
+                          Key: ${app.shortcutKey}
+                        </span>
+                      </div>
+                      <p class="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+                        ${app.subtitle}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 説明文 -->
+                <p class="text-sm sm:text-[15px] leading-relaxed text-slate-600 dark:text-slate-300 mb-4 ${app.featured ? 'max-w-2xl' : ''}">
+                  ${app.description}
+                </p>
+
+                <!-- タグ一覧 ＆ URL表示 -->
+                <div class="flex flex-wrap items-center gap-2">
+                  ${tagsHtml}
+                  <span class="text-xs font-mono text-slate-400 dark:text-slate-500 truncate ml-1">
+                    ${app.url.replace('https://', '')}
+                  </span>
+                </div>
+              </div>
+
+              <!-- 右側 / 下側: アクションボタン群（スマホでも片手でタップしやすいサイズ） -->
+              <div class="${actionAreaClass}">
+                <!-- クイックプレビューボタン -->
+                <button
+                  type="button"
+                  onclick="openPreviewModal(event, '${app.id}')"
+                  class="flex-1 sm:flex-initial inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-2xl bg-slate-200/75 dark:bg-slate-800/90 hover:bg-slate-300/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-semibold transition-colors cursor-pointer"
+                  title="モーダル内でプレビュー表示"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                  </svg>
+                  <span>プレビュー</span>
+                </button>
+
+                <!-- URLコピーボタン -->
+                <button
+                  type="button"
+                  onclick="copyAppUrl(event, '${app.url}', '${app.title}')"
+                  class="p-3 rounded-2xl bg-slate-200/75 dark:bg-slate-800/90 hover:bg-slate-300/80 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 transition-colors cursor-pointer shrink-0"
+                  title="URLをコピー"
+                  aria-label="URLをコピー"
+                >
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+
+                <!-- メイン起動ボタン -->
+                <button
+                  type="button"
+                  onclick="event.stopPropagation(); launchApp('${app.url}', '${app.title}')"
+                  class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl ${app.buttonBg} text-white text-sm font-bold shadow-lg transition-all cursor-pointer"
+                >
+                  <span>開く</span>
+                  <svg class="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="7" y1="17" x2="17" y2="7"></line>
+                    <polyline points="7 7 17 7 17 17"></polyline>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    /**
+     * 検索クリア処理
+     */
+    function clearSearch() {
+      const searchInput = document.getElementById('search-input');
+      searchInput.value = '';
+      searchQuery = '';
+      document.getElementById('clear-search-btn').classList.add('hidden');
+      renderCards();
+      searchInput.focus();
+    }
+
+    /**
+     * Google検索を実行（スタートページとしての利便性向上）
+     */
+    function executeWebSearch() {
+      const q = document.getElementById('search-input').value.trim();
+      if (!q) return;
+      const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+      launchApp(googleUrl, 'Google検索');
+    }
+
+    /**
+     * トースト通知を表示
+     */
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-slate-800/95 text-white text-xs sm:text-sm font-medium shadow-xl border border-slate-700/80 flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0';
+      toast.innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+        <span>${message}</span>
+      `;
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 2400);
+    }
+
+    /**
+     * 検索バーとキーボードショートカットのイベント登録
+     */
+    function setupEventListeners() {
+      const searchInput = document.getElementById('search-input');
+      const clearBtn = document.getElementById('clear-search-btn');
+
+      searchInput.addEventListener('input', (e) => {
+        searchQuery = e.target.value;
+        if (searchQuery.length > 0) {
+          clearBtn.classList.remove('hidden');
+        } else {
+          clearBtn.classList.add('hidden');
+        }
+        renderCards();
+      });
+
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const q = searchInput.value.trim().toLowerCase();
+          // 完全一致または1件だけ絞り込まれている場合はそのアプリを開く
+          const matched = APPS.filter(app =>
+            app.title.toLowerCase().includes(q) ||
+            app.keywords.toLowerCase().includes(q)
+          );
+          if (q && matched.length === 1) {
+            launchApp(matched[0].url, matched[0].title);
+          } else if (q) {
+            executeWebSearch();
+          }
+        } else if (e.key === 'Escape') {
+          clearSearch();
+          searchInput.blur();
+        }
+      });
+
+      // グローバルキーボードショートカット（1, 2, 3, /, Escape）
+      document.addEventListener('keydown', (e) => {
+        const activeTag = document.activeElement.tagName.toLowerCase();
+        const isTyping = activeTag === 'input' || activeTag === 'textarea';
+
+        // Escapeでモーダルを閉じる
+        if (e.key === 'Escape') {
+          const modal = document.getElementById('preview-modal');
+          if (!modal.classList.contains('hidden')) {
+            closePreviewModal();
+          }
+          return;
+        }
+
+        if (isTyping) return;
+
+        // '/' キーで検索バーにフォーカス
+        if (e.key === '/') {
+          e.preventDefault();
+          searchInput.focus();
+          return;
+        }
+
+        // '1', '2', '3' キーで対応するアプリを即座に起動
+        const targetApp = APPS.find(app => app.shortcutKey === e.key);
+        if (targetApp) {
+          e.preventDefault();
+          showToast(`ショートカット [${e.key}]: ${targetApp.title} を起動します`);
+          launchApp(targetApp.url, targetApp.title);
+        }
+      });
+    }
+
+    // ページ読み込み完了時に初期化
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
